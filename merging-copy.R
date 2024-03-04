@@ -273,9 +273,9 @@ for (df in groups){
 }
 # Create summary datasets for each ADHD label count
 summary_data_ctrl_adhd4 <- ctrl_subjects %>%
-   group_by(community, ADHD4) %>%
+   group_by(community, Ctrl = ADHD4) %>%
    summarise(count = n()) %>%
-   filter(ADHD4 == "Ctrl") %>%
+   filter(Ctrl == "Ctrl") %>%
    ungroup()
 
 summary_data_ADHD1 <- filtered_data %>%
@@ -309,11 +309,11 @@ summary_data_ADHD4 <- filtered_data %>%
 summary_data_combined <- bind_rows(summary_data_ctrl_adhd4, summary_data_ADHD1, summary_data_ADHD2, summary_data_ADHD3,summary_data_ADHD4)
 
 agg_data_test <- summary_data_combined %>%
-  group_by(community, ADHD1,ADHD2,ADHD3,ADHD4) %>%
+  group_by(community, ADHD1,ADHD2,ADHD3,ADHD4,Ctrl) %>%
   summarise(count = sum(count))
 
 agg_data_tidy <- agg_data_test %>%
-  pivot_longer(cols = starts_with("ADHD"), names_to = "ADHD_label", values_to = "ADHD") %>%
+  pivot_longer(cols = c(ADHD1,ADHD2,ADHD3,ADHD4,Ctrl), names_to = "ADHD_label", values_to = "ADHD") %>%
   drop_na() %>%
   select(community, ADHD_label, count)
 
@@ -323,9 +323,25 @@ ggplot(agg_data_tidy, aes(x = community, y = count, fill = ADHD_label)) +
   geom_text(aes(label = count), vjust = -0.5, position = position_dodge(width = 0.9)) +
   labs(x = "Community", y = "Count", title = "ADHD Label Counts by Community for List ARMS2") +
   theme_minimal()
+##need to fix##
+ggplot(agg_data_tidy, aes(x = "", y = count, fill = ADHD_label)) +
+  geom_col(width = 1) +
+  coord_polar("y", start=0) +
+  labs(x = NULL, y = NULL, fill = "ADHD Label", title = "ADHD Label Counts by Community for List ARMS2") +
+  facet_wrap(~ community, ncol = 2) +
+  theme_minimal()
 
-
-
+ggplot(agg_data_tidy, aes(x = "", y = count, fill = ADHD_label)) +
+  geom_col(width = 1) +
+  coord_polar("y", start=0) +
+  labs(x = NULL, y = NULL, fill = "ADHD Label", title = "ADHD Label Counts by Community for List ARMS2") +
+  facet_wrap(~ community, ncol = 2) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  geom_text(aes(label = paste("n=", sum(count))), 
+            x = 0, y = -0.5, 
+            hjust = 0.5, vjust = 0, 
+            size = 4, color = "black")
 
 
 
