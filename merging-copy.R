@@ -272,6 +272,12 @@ for (df in groups){
   }
 }
 # Create summary datasets for each ADHD label count
+summary_data_ctrl_adhd4 <- ctrl_subjects %>%
+   group_by(community, ADHD4) %>%
+   summarise(count = n()) %>%
+   filter(ADHD4 == "Ctrl") %>%
+   ungroup()
+
 summary_data_ADHD1 <- filtered_data %>%
   group_by(community, ADHD1) %>%
   summarise(count = n()) %>%
@@ -300,7 +306,7 @@ summary_data_ADHD4 <- filtered_data %>%
   mutate(ADHD4 = ifelse(ADHD4 == "ADHD", paste0(ADHD4, "4"), ADHD4)) %>%
   ungroup()
 
-summary_data_combined <- bind_rows(summary_data_ADHD1_test, summary_data_ADHD2, summary_data_ADHD3,summary_data_ADHD4)
+summary_data_combined <- bind_rows(summary_data_ctrl_adhd4, summary_data_ADHD1, summary_data_ADHD2, summary_data_ADHD3,summary_data_ADHD4)
 
 agg_data_test <- summary_data_combined %>%
   group_by(community, ADHD1,ADHD2,ADHD3,ADHD4) %>%
