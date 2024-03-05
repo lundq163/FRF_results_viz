@@ -323,31 +323,6 @@ ggplot(agg_data_tidy, aes(x = community, y = count, fill = ADHD_label)) +
   geom_text(aes(label = count), vjust = -0.5, position = position_dodge(width = 0.9)) +
   labs(x = "Community", y = "Count", title = "ADHD Label Counts by Community for List ARMS2") +
   theme_minimal()
-##need to fix##
-total_counts <- aggregate(count ~ community, data = agg_data_tidy, FUN = sum)
-
-
-ggplot(agg_data_tidy, aes(x = "", y = count, fill = ADHD_label)) +
-  geom_col(width = 1) +
-  coord_polar("y", start=0) +
-  scale_y_continuous(limits = c(0, max(total_counts$count))) +
-  labs(x = NULL, y = NULL, fill = "ADHD Label", title = "ADHD Label Counts by Community for List ARMS2") +
-  facet_wrap(~ community, ncol = 2) +
-  theme_minimal()
-
-
-ggplot(agg_data_tidy, aes(x = "", y = count, fill = ADHD_label)) +
-  geom_col(width = 1) +
-  coord_polar("y", start=0) +
-  scale_y_continuous(limits = c(0, max(total_counts$count))) +
-  labs(x = NULL, y = NULL, fill = "ADHD Label", title = "ADHD Label Counts by Community for List ARMS2") +
-  facet_wrap(~ community, ncol = 2) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  geom_text(aes(label = paste("n=", sum(count))), 
-            x = 0, y = -0.5, 
-            hjust = 0.5, vjust = 0, 
-            size = 4, color = "black")
 
 
 library(ggplot2)
@@ -456,8 +431,23 @@ ggplot(filtered_data, aes(x = community, y = nihtbx_totalcomp_agecorrected.basel
 
 
 
+#### testing ####
 
 
+
+library(ggplot2)
+library(tidyr)
+
+# Reshape the data to have each y metric in its own column
+reshaped_data <- filtered_data %>%
+  pivot_longer(cols = starts_with("nihtbx_"), names_to = "metric", values_to = "value")
+
+# Create the box plot
+ggplot(reshaped_data, aes(x = community, y = value, fill = metric)) +
+  geom_boxplot(position = position_dodge(width = 0.8)) +
+  stat_summary(fun = mean, geom = "text", aes(label = round(..y.., digits = 3)),
+               position = position_dodge(width = 0.8), vjust = -1) +
+  labs(x = "Community", y = "Value", title = "Box Plot of Metrics by Community")
 
 
 
