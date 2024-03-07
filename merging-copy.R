@@ -412,7 +412,7 @@ write.csv(merged_temp_fixed_arms2_list_data, "/home/feczk001/shared/projects/FEZ
 library(ggplot2)
 
 # Read the CSV file
-data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS1_merged.csv")
+data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_list_ARMS2_merged.csv")
 
 communities_more_than_100 <- names(table(data$community))[table(data$community) > 100]
 
@@ -423,11 +423,33 @@ filtered_data <- data[data$community %in% communities_more_than_100, ]
 filtered_data$community <- factor(filtered_data$community)
 
 # Create the box plot for ADHDcomposite score
-ggplot(filtered_data, aes(x = community, y = nihtbx_totalcomp_agecorrected.baseline_year_1_arm_1, fill = community)) +
-  geom_boxplot() +
-  stat_summary(fun = mean, geom = "text", aes(label = round(..y.., digits = 3)),
-               position=position_dodge(width=0.75), vjust=-1) +
-  labs(x = "Community", y = "nihtbx_totalcomp_agecorrected", title = "Fluid ARMS1 nihtbx_totalcomp_agecorrected fixed Score by Community")
+#ggplot(filtered_data, aes(x = community, y = nihtbx_totalcomp_agecorrected.baseline_year_1_arm_1, fill = community)) +
+#  geom_boxplot() +
+#  stat_summary(fun = mean, geom = "text", aes(label = round(..y.., digits = 3)),
+#               position=position_dodge(width=0.75), vjust=-1) +
+#  labs(x = "Community", y = "nihtbx_totalcomp_agecorrected", title = "Fluid ARMS1 nihtbx_totalcomp_agecorrected fixed Score by Community")
+
+
+
+
+library(tidyr)
+
+# Reshape the data to have each y metric in its own column
+reshaped_data <- filtered_data %>%
+  pivot_longer(cols = starts_with("nihtbx_"), names_to = "metric", values_to = "value")
+
+ggplot(reshaped_data, aes(x = community, y = value, fill = metric)) +
+  geom_boxplot(position = position_dodge(width = 0.8)) +
+  labs(x = "Community", y = "Value", title = "NIH toolbox Metrics by Community for List Arms2")
+
+reshaped_data2 <- filtered_data %>%
+  pivot_longer(cols = matches("^bis_y|^upps_y"), names_to = "metric", values_to = "value")
+
+ggplot(reshaped_data2, aes(x = community, y = value, fill = metric)) +
+  geom_boxplot(position = position_dodge(width = 0.8)) +
+  labs(x = "Community", y = "Value", title = "BIS/BAS and UPPS Metrics by Community for List Arms2")
+
+
 
 
 
@@ -436,60 +458,25 @@ ggplot(filtered_data, aes(x = community, y = nihtbx_totalcomp_agecorrected.basel
 
 
 library(ggplot2)
-library(tidyr)
 
-# Reshape the data to have each y metric in its own column
-reshaped_data <- filtered_data %>%
-  pivot_longer(cols = starts_with("nihtbx_"), names_to = "metric", values_to = "value")
+ggplot(reshaped_data2, aes(x = community, y = value, fill = metric)) +
+  geom_boxplot(position = position_dodge(width = 0.8)) +
+  labs(x = "Community", y = "Value", title = "BIS/BAS and UPPS Metrics by Community for Fluid Arms1") +
+  theme(
+    legend.key.width = unit(0.2, "cm"),  # Adjust legend width
+    legend.spacing.x = unit(0.1, "cm"),   # Adjust horizontal space between legend elements
+    plot.title = element_text(size = 14),  # Adjust title size
+  )
 
-# Create the box plot
+
+
+
+# Define a color palette for the communities
+community_colors <- rainbow(length(unique(reshaped_data$community)))
+
 ggplot(reshaped_data, aes(x = community, y = value, fill = metric)) +
   geom_boxplot(position = position_dodge(width = 0.8)) +
-  stat_summary(fun = mean, geom = "text", aes(label = round(..y.., digits = 3)),
-               position = position_dodge(width = 0.8), vjust = -1) +
+  scale_fill_manual(values = rep(community_colors, each = length(unique(reshaped_data$metric)))) +
   labs(x = "Community", y = "Value", title = "Box Plot of Metrics by Community")
 
 
-
-
-
-# ARM2!!!!!!! NOT REALLY USING ATM
-data2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_flanker_ARMS2_merged.csv")
-
-communities_more_than_100 <- names(table(data2$community))[table(data2$community) > 100]
-
-# Filter the dataframe to include only the communities with more than 100 participants
-filtered_data2 <- data2[data2$community %in% communities_more_than_100, ]
-
-# Convert community to a factor to ensure proper ordering on the x-axis
-filtered_data2$community <- factor(filtered_data2$community)
-
-# Create the box plot
-ggplot(filtered_data2, aes(x = community, y = ADHDcomposite, fill = community)) +
-  geom_boxplot() +
-  labs(x = "Community", y = "ADHD Composite Score", title = "flanker arms2 ADHD Composite Score by Community")
-
-
-
-
-
-
-
-# Not working atm!!!!!!!!!
-# Load necessary library
-library(ggplot2)
-
-# Read the CSV file
-data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_flanker_ARMS1_merged.csv")
-
-# Convert community to a factor to ensure proper ordering on the x-axis
-data$community <- factor(data$community)
-
-# Create a summary table to calculate sample size of each community
-summary_table <- data.frame(table(data$community))
-
-# Create the box plot
-ggplot(data, aes(x = community, y = ADHDcomposite, fill = community)) +
-  geom_boxplot() +
-  labs(x = "Community", y = "ADHD Composite Score", title = "Box Plot of ADHD Composite Score by Community") +
-  geom_text(data = summary_table, aes(label = summary_table$Freq, x = as.numeric(summary_table$Var1), y = Inf), vjust = -0.5, size = 3.5)
