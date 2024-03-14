@@ -324,6 +324,12 @@ ggplot(agg_data_tidy, aes(x = community, y = count, fill = ADHD_label)) +
   labs(x = "Community", y = "Count", title = "ADHD Label Counts by Community for List ARMS2") +
   theme_minimal()
 
+proportion_data <- agg_data_tidy %>%
+  group_by(community) %>%
+  mutate(group_total = sum(count),
+         proportion = count/group_total) %>%
+  ungroup()
+
 
 library(ggplot2)
 library(gridExtra)
