@@ -2,23 +2,25 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
-data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_list_ARMS1_merged.csv")
-data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_list_ARMS2_merged.csv")
+#load merged adhd data
+data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_fluid_ARMS1_merged.csv")
+data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_fluid_ARMS2_merged.csv")
 
+
+#only keep communities with >100 participants 
 communities_more_than_100_arms1 <- names(table(data_arms1$community))[table(data_arms1$community) > 100]
 communities_more_than_100_arms2 <- names(table(data_arms2$community))[table(data_arms2$community) > 100]
 
-
-# Filter the dataframe to include only the communities with more than 100 participants
 filtered_data_arms1 <- data_arms1[data_arms1$community %in% communities_more_than_100_arms1, ]
 filtered_data_arms2 <- data_arms2[data_arms2$community %in% communities_more_than_100_arms2, ]
 
 
-# Convert community to a factor to ensure proper ordering on the x-axis
+#convert community to a factor to ensure proper ordering on the x-axis
 filtered_data_arms1$community <- factor(filtered_data_arms1$community)
 filtered_data_arms2$community <- factor(filtered_data_arms2$community)
 
 
+#check label distribution counts for arms1 then arms2
 arms1_ctrl_subjects <- filtered_data_arms1 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "Ctrl" & ADHD3 == "Ctrl" & ADHD4 == "Ctrl")
 arms1_only_adhd1 <- filtered_data_arms1 %>%
@@ -103,7 +105,9 @@ for (df in groups_arms2){
     print(nrow(df))
   }
 }
-# Create summary datasets for each ADHD label count
+
+
+#create summary datasets for each ADHD label count. first arms1 then arms2
 summary_data_arms1_ctrl_adhd4 <- arms1_ctrl_subjects %>%
   group_by(community, Ctrl = ADHD4) %>%
   summarise(count = n()) %>%
@@ -176,6 +180,7 @@ summary_data_arms1_combined <- bind_rows(summary_data_arms1_ctrl_adhd4, summary_
 summary_data_arms2_combined <- bind_rows(summary_data_arms2_ctrl_adhd4, summary_data_arms2_ADHD1, summary_data_arms2_ADHD2, summary_data_arms2_ADHD3,summary_data_arms2_ADHD4)
 
 
+#aggregate summary data for arms1 then arms2
 agg_data_arms1_test <- summary_data_arms1_combined %>%
   group_by(community, ADHD1,ADHD2,ADHD3,ADHD4,Ctrl) %>%
   summarise(count = sum(count))
@@ -184,6 +189,8 @@ agg_data_arms2_test <- summary_data_arms2_combined %>%
   group_by(community, ADHD1,ADHD2,ADHD3,ADHD4,Ctrl) %>%
   summarise(count = sum(count))
 
+
+#reformat columns and drop na values
 agg_data_arms1_tidy <- agg_data_arms1_test %>%
   pivot_longer(cols = c(ADHD1,ADHD2,ADHD3,ADHD4,Ctrl), names_to = "ADHD_label", values_to = "ADHD") %>%
   drop_na() %>%
@@ -194,6 +201,8 @@ agg_data_arms2_tidy <- agg_data_arms2_test %>%
   drop_na() %>%
   select(community, ADHD_label, count)
 
+
+#calculate proportion values for each label count
 proportion_data_arms1 <- agg_data_arms1_tidy %>%
   group_by(community) %>%
   mutate(group_total = sum(count),
@@ -206,7 +215,7 @@ proportion_data_arms2 <- agg_data_arms2_tidy %>%
          proportion = count/group_total) %>%
   ungroup()
 
-# test for chi squared calculation 
+#test for chi squared calculation 
 chi_sq_test <- function(observed, expected) {
   chisq_result <- chisq.test(observed, p = expected)
   return(chisq_result$statistic)
@@ -215,24 +224,24 @@ chi_sq_test <- function(observed, expected) {
 comparison_results <- list()
 
 for (comm1 in unique(proportion_data_arms1$community)) {
-  # Subset the data for the current community in arms1
+  #subset the data for the current community in arms1
   comm1_data <- proportion_data_arms1 %>%
     filter(community == comm1) %>%
     select(ADHD_label, proportion)
   
-  # Loop over communities in proportion_data_arms2
+  #loop over communities in proportion_data_arms2
   for (comm2 in unique(proportion_data_arms2$community)) {
-    # Subset the data for the current community in arms2
+    #subset the data for the current community in arms2
     comm2_data <- proportion_data_arms2 %>%
       filter(community == comm2) %>%
       select(ADHD_label, proportion)
     
-    # Perform the chi-squared test and store the result
+    #perform the chi-squared test and store the result
     comparison_results[[paste0(comm1, "_vs_", comm2)]] <- chi_sq_test(comm1_data$proportion, comm2_data$proportion)
   }
 }
 
-# Create a data frame with keys and sorted values
+#create a data frame to sort comparison results from most to least similar
 sorted_results_df <- data.frame(
   comparison = names(comparison_results),
   chi_squared = unname(sapply(comparison_results, function(x) x)),
@@ -241,28 +250,23 @@ sorted_results_df <- data.frame(
 sorted_results_df <- sorted_results_df[order(sorted_results_df$chi_squared), ]
 
 
-###Viz###
+#################Viz#################
 
-library(dplyr)
-library(tidyr)
-library(ggplot2)
 
-# Assuming you have the comparison_results list
-
-# Convert the list to a data frame
+#convert the list to a data frame
 comparison_df <- data.frame(
   comparison = names(comparison_results),
   chi_squared = unname(sapply(comparison_results, function(x) x))
 )
 
-# Separate the comparison names into arm1_comm and arm2_comm
+#separate the comparison names into arm1_comm and arm2_comm
 comparison_df <- comparison_df %>%
   separate(comparison, into = c("arm1_comm", "arm2_comm"), sep = "_vs_")
 
-# Create a matrix of chi-squared values
+#create a matrix of chi-squared values
 chi_squared_matrix <- xtabs(chi_squared ~ arm1_comm + arm2_comm, data = comparison_df)
 
-# Plot the matrix
+#plot the matrix
 ggplot(comparison_df, aes(arm1_comm, arm2_comm, fill = chi_squared)) +
   geom_tile() +
   scale_fill_gradient(low = "green", high = "red", trans = "log") +

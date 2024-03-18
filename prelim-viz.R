@@ -418,7 +418,7 @@ write.csv(merged_temp_fixed_arms2_list_data, "/home/feczk001/shared/projects/FEZ
 library(ggplot2)
 
 # Read the CSV file
-data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_list_ARMS2_merged.csv")
+data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS2_merged.csv")
 
 communities_more_than_100 <- names(table(data$community))[table(data$community) > 100]
 
