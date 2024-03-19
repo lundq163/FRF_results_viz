@@ -1,6 +1,7 @@
 library(ggplot2)
 library(tidyr)
 library(stringr)
+library(dplyr)
 
 
 #read the CSV file
@@ -15,24 +16,54 @@ filtered_data <- data[data$community %in% communities_more_than_100, ]
 #convert community to a factor to ensure proper ordering on the x-axis
 filtered_data$community <- factor(filtered_data$community)
 
+mean_and_se_by_community <- filtered_data %>%
+  group_by(community) %>%
+  summarise(across(starts_with("nihtbx_"),
+                   list(mean = ~ mean(.x, na.rm = TRUE),
+                        se = ~ sd(.x, na.rm = TRUE) / sqrt(n())),
+                   .names = "{.col}_{.fn}"))
 
-#reshape the data to have each y metric in its own column
-reshaped_data <- filtered_data %>%
-  pivot_longer(cols = starts_with("nihtbx_"), names_to = "metric", values_to = "value")
+mean_and_se_by_community_renamed <- mean_and_se_by_community %>%
+  rename_with(~ {
+    new_names <- str_split(., "_")
+    new_names <- lapply(new_names, function(parts) {
+      if (length(parts) >= 3 && parts[1] == "nihtbx") {
+        paste0(parts[2], "_", tail(parts, 1))
+      } else {
+        .
+      }
+    })
+    unlist(new_names)
+  }, starts_with("nihtbx"))
 
-ggplot(reshaped_data, aes(x = metric, y = value, color = community, group = community)) +
+unique_prefixes <- mean_and_se_by_community_renamed %>%
+  names() %>%
+  str_extract("^[^_]+") %>%
+  unique() %>%
+  .[. != "community"]
+
+# Convert the data from wide to long format
+mean_and_se_by_community_long <- pivot_longer(mean_and_se_by_community_renamed,
+                                              cols = starts_with(unique_prefixes),
+                                              names_to = c("metric", ".value"),
+                                              names_sep = "_")
+
+# Plot the line chart with error bars
+ggplot(mean_and_se_by_community_long, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
-  labs(x = "Metric", y = "Value", title = "NIH toolbox Metrics by Community for fluid Arms1")
-
-#ggplot(reshaped_data, aes(x = factor(sub("^(.*?)_(.*)_.*$", "\\2", metric)), y = value, color = community, group = community)) +
-#  geom_line() +
-#  labs(x = "Metric Abbreviation", y = "Value", title = "NIH toolbox Metrics by Community for fluid Arms1") +
-#  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-ggplot(reshaped_data, aes(x = factor(str_extract(metric, "(?<=nihtbx_)\\w+(?=_)")), y = value, color = community, group = community)) +
-  geom_line() +
-  labs(x = "Metric Abbreviation", y = "Value", title = "NIH toolbox Metrics by Community for fluid Arms1") +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms1") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+# Create a user input to select the desired communities
+communities_to_plot <- select.list(communities_more_than_100, multiple = TRUE, title = "Select communities to plot:")
 
+# Filter the reshaped data based on the selected communities
+mean_and_se_by_community_selected <- mean_and_se_by_community_long[mean_and_se_by_community_long$community %in% communities_to_plot, ]
+
+# Plot the line chart with error bars
+ggplot(mean_and_se_by_community_selected, aes(x = factor(metric), y = mean, color = community, group = community)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms1") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
