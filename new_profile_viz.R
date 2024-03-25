@@ -5,7 +5,7 @@ library(dplyr)
 
 
 #read the CSV file
-data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS1_merged.csv")
+data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS2_merged.csv")
 
 
 #filter the dataframe to include only the communities with more than 100 participants
@@ -40,7 +40,7 @@ unique_prefixes <- mean_and_se_by_community_renamed %>%
   names() %>%
   str_extract("^[^_]+") %>%
   unique() %>%
-  .[. != "community"]
+  .[!. %in% c("community", "fluidcomp")]
 
 # Convert the data from wide to long format
 mean_and_se_by_community_long <- pivot_longer(mean_and_se_by_community_renamed,
@@ -52,7 +52,7 @@ mean_and_se_by_community_long <- pivot_longer(mean_and_se_by_community_renamed,
 ggplot(mean_and_se_by_community_long, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms1") +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms2") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Create a user input to select the desired communities
@@ -65,5 +65,5 @@ mean_and_se_by_community_selected <- mean_and_se_by_community_long[mean_and_se_b
 ggplot(mean_and_se_by_community_selected, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms1") +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms2") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))

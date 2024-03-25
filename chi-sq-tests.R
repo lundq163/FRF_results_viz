@@ -215,6 +215,59 @@ proportion_data_arms2 <- agg_data_arms2_tidy %>%
          proportion = count/group_total) %>%
   ungroup()
 
+############# testing viz ##################
+# Define the data array
+#data <- c(0.3829787, 0.2583587, 0.1367781, 0.063829787, 0.617021277)
+
+# Define the labels for the x-axis
+#labels <- c("ADHD1_total", "ADHD2_total", "ADHD3_total", "ADHD4_total", "Ctrl_total")
+
+# Create the bar chart
+#barplot(data, names.arg = labels, xlab = "label", ylab = "Proportion",
+#        main = "Fluid Community 6, Arm1", col = "steelblue")
+
+
+############## new necessary stacked bar chart #################
+
+ggplot(proportion_data_arms1, aes(fill=ADHD_label, y=proportion, x=community)) +
+  geom_bar(position="fill", stat="identity") +
+  coord_flip()
+
+ggplot(proportion_data_arms2, aes(fill=ADHD_label, y=proportion, x=community)) +
+  geom_bar(position="fill", stat="identity") +
+  coord_flip()
+
+
+
+library(dplyr)
+library(ggplot2)
+
+# Calculate the totals
+data_with_totals <- proportion_data_arms1 %>%
+  group_by(community) %>%
+  mutate(ADHD1_total = sum(proportion[ADHD_label == "ADHD1"]),
+         ADHD2_total = sum(proportion[ADHD_label %in% c("ADHD1", "ADHD2")]),
+         ADHD3_total = sum(proportion[ADHD_label %in% c("ADHD1", "ADHD2", "ADHD3")]),
+         ADHD4_total = proportion[ADHD_label == "ADHD4"]) %>%
+  ungroup()
+
+# Create the bar chart
+ggplot(data_with_totals, aes(x = ADHD_label, y = proportion, fill = ADHD_label)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~community) +
+  labs(x = "ADHD Label", y = "Proportion") +
+  scale_fill_discrete(labels = c("ADHD1_total" = "ADHD1 Total",
+                                 "ADHD2_total" = "ADHD2 Total",
+                                 "ADHD3_total" = "ADHD3 Total",
+                                 "ADHD4_total" = "ADHD4",
+                                 "ADHD1" = "ADHD1",
+                                 "ADHD2" = "ADHD2",
+                                 "ADHD3" = "ADHD3",
+                                 "ADHD4" = "ADHD4",
+                                 "Ctrl" = "Control"))
+
+
+
 #test for chi squared calculation 
 chi_sq_test <- function(observed, expected) {
   chisq_result <- chisq.test(observed, p = expected)
@@ -223,11 +276,12 @@ chi_sq_test <- function(observed, expected) {
 
 comparison_results <- list()
 
+#across arms
 for (comm1 in unique(proportion_data_arms1$community)) {
   #subset the data for the current community in arms1
   comm1_data <- proportion_data_arms1 %>%
     filter(community == comm1) %>%
-    select(ADHD_label, proportion)
+    select(ADHD_label, proportion, group_total)
   
   #loop over communities in proportion_data_arms2
   for (comm2 in unique(proportion_data_arms2$community)) {
@@ -237,7 +291,27 @@ for (comm1 in unique(proportion_data_arms1$community)) {
       select(ADHD_label, proportion)
     
     #perform the chi-squared test and store the result
-    comparison_results[[paste0(comm1, "_vs_", comm2)]] <- chi_sq_test(comm1_data$proportion, comm2_data$proportion)
+    comparison_results[[paste0(comm1, "_vs_", comm2)]] <- chi_sq_test((comm1_data$proportion*comm1_data$group_total), comm2_data$proportion)
+  }
+}
+
+
+#within arms
+for (comm1 in unique(proportion_data_arms2$community)) {
+  #subset the data for the current community in arms1
+  comm1_data <- proportion_data_arms2 %>%
+    filter(community == comm1) %>%
+    select(ADHD_label, proportion, group_total)
+  
+  #loop over communities in proportion_data_arms2
+  for (comm2 in unique(proportion_data_arms2$community)) {
+    #subset the data for the current community in arms2
+    comm2_data <- proportion_data_arms2 %>%
+      filter(community == comm2) %>%
+      select(ADHD_label, proportion)
+    
+    #perform the chi-squared test and store the result
+    comparison_results[[paste0(comm1, "_vs_", comm2)]] <- chi_sq_test((comm1_data$proportion*comm1_data$group_total), comm2_data$proportion)
   }
 }
 
@@ -269,7 +343,7 @@ chi_squared_matrix <- xtabs(chi_squared ~ arm1_comm + arm2_comm, data = comparis
 #plot the matrix
 ggplot(comparison_df, aes(arm1_comm, arm2_comm, fill = chi_squared)) +
   geom_tile() +
-  scale_fill_gradient(low = "green", high = "red", trans = "log") +
+  scale_fill_gradient(low = "green", high = "red") +
   labs(x = "Communities (Arms 1)", y = "Communities (Arms 2)", fill = "Chi-squared Statistic") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
