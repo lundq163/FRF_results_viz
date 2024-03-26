@@ -31,27 +31,27 @@ arms1_only_adhd3 <- filtered_data_arms1 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "Ctrl" & ADHD3 == "ADHD" & ADHD4 == "Ctrl")
 arms1_only_adhd4 <- filtered_data_arms1 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "Ctrl" & ADHD3 == "Ctrl" & ADHD4 == "ADHD")
-arsm1_adhd12 <- filtered_data_arms1 %>%
+arms1_adhd12 <- filtered_data_arms1 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "ADHD" & ADHD3 == "Ctrl" & ADHD4 == "Ctrl")
-arsm1_adhd13 <- filtered_data_arms1 %>%
+arms1_adhd13 <- filtered_data_arms1 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "Ctrl" & ADHD3 == "ADHD" & ADHD4 == "Ctrl")
-arsm1_adhd14 <- filtered_data_arms1 %>%
+arms1_adhd14 <- filtered_data_arms1 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "Ctrl" & ADHD3 == "Ctrl" & ADHD4 == "ADHD")
-arsm1_adhd23 <- filtered_data_arms1 %>%
+arms1_adhd23 <- filtered_data_arms1 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "ADHD" & ADHD3 == "ADHD" & ADHD4 == "Ctrl")
-arsm1_adhd24 <- filtered_data_arms1 %>%
+arms1_adhd24 <- filtered_data_arms1 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "ADHD" & ADHD3 == "Ctrl" & ADHD4 == "ADHD")
-arsm1_adhd34 <- filtered_data_arms1 %>%
+arms1_adhd34 <- filtered_data_arms1 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "Ctrl" & ADHD3 == "ADHD" & ADHD4 == "ADHD")
-arsm1_adhd123 <- filtered_data_arms1 %>%
+arms1_adhd123 <- filtered_data_arms1 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "ADHD" & ADHD3 == "ADHD" & ADHD4 == "Ctrl")
-arsm1_adhd124 <- filtered_data_arms1 %>%
+arms1_adhd124 <- filtered_data_arms1 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "ADHD" & ADHD3 == "Ctrl" & ADHD4 == "ADHD")
-arsm1_adhd134 <- filtered_data_arms1 %>%
+arms1_adhd134 <- filtered_data_arms1 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "Ctrl" & ADHD3 == "ADHD" & ADHD4 == "ADHD")
-arsm1_adhd234 <- filtered_data_arms1 %>%
+arms1_adhd234 <- filtered_data_arms1 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "ADHD" & ADHD3 == "ADHD" & ADHD4 == "ADHD")
-arsm1_adhd1234 <- filtered_data_arms1 %>%
+arms1_adhd1234 <- filtered_data_arms1 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "ADHD" & ADHD3 == "ADHD" & ADHD4 == "ADHD")
 
 arms2_ctrl_subjects <- filtered_data_arms2 %>%
@@ -64,31 +64,31 @@ arms2_only_adhd3 <- filtered_data_arms2 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "Ctrl" & ADHD3 == "ADHD" & ADHD4 == "Ctrl")
 arms2_only_adhd4 <- filtered_data_arms2 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "Ctrl" & ADHD3 == "Ctrl" & ADHD4 == "ADHD")
-arsm2_adhd12 <- filtered_data_arms2 %>%
+arms2_adhd12 <- filtered_data_arms2 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "ADHD" & ADHD3 == "Ctrl" & ADHD4 == "Ctrl")
-arsm2_adhd13 <- filtered_data_arms2 %>%
+arms2_adhd13 <- filtered_data_arms2 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "Ctrl" & ADHD3 == "ADHD" & ADHD4 == "Ctrl")
-arsm2_adhd14 <- filtered_data_arms2 %>%
+arms2_adhd14 <- filtered_data_arms2 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "Ctrl" & ADHD3 == "Ctrl" & ADHD4 == "ADHD")
-arsm2_adhd23 <- filtered_data_arms2 %>%
+arms2_adhd23 <- filtered_data_arms2 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "ADHD" & ADHD3 == "ADHD" & ADHD4 == "Ctrl")
-arsm2_adhd24 <- filtered_data_arms2 %>%
+arms2_adhd24 <- filtered_data_arms2 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "ADHD" & ADHD3 == "Ctrl" & ADHD4 == "ADHD")
-arsm2_adhd34 <- filtered_data_arms2 %>%
+arms2_adhd34 <- filtered_data_arms2 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "Ctrl" & ADHD3 == "ADHD" & ADHD4 == "ADHD")
-arsm2_adhd123 <- filtered_data_arms2 %>%
+arms2_adhd123 <- filtered_data_arms2 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "ADHD" & ADHD3 == "ADHD" & ADHD4 == "Ctrl")
-arsm2_adhd124 <- filtered_data_arms2 %>%
+arms2_adhd124 <- filtered_data_arms2 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "ADHD" & ADHD3 == "Ctrl" & ADHD4 == "ADHD")
-arsm2_adhd134 <- filtered_data_arms2 %>%
+arms2_adhd134 <- filtered_data_arms2 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "Ctrl" & ADHD3 == "ADHD" & ADHD4 == "ADHD")
-arsm2_adhd234 <- filtered_data_arms2 %>%
+arms2_adhd234 <- filtered_data_arms2 %>%
   filter(ADHD1 == "Ctrl" & ADHD2 == "ADHD" & ADHD3 == "ADHD" & ADHD4 == "ADHD")
-arsm2_adhd1234 <- filtered_data_arms2 %>%
+arms2_adhd1234 <- filtered_data_arms2 %>%
   filter(ADHD1 == "ADHD" & ADHD2 == "ADHD" & ADHD3 == "ADHD" & ADHD4 == "ADHD")
 
-groups_arms1 <- list(filtered_data_arms1,arms1_ctrl_subjects,arms1_only_adhd1,arms1_only_adhd2,arms1_only_adhd3,arms1_only_adhd4,arsm1_adhd12,arsm1_adhd13,arsm1_adhd14,arsm1_adhd23,arsm1_adhd24,arsm1_adhd34,arsm1_adhd123,arsm1_adhd124,arsm1_adhd134,arsm1_adhd234,arsm1_adhd1234)
-groups_arms2 <- list(filtered_data_arms2,arms2_ctrl_subjects,arms2_only_adhd1,arms2_only_adhd2,arms2_only_adhd3,arms2_only_adhd4,arsm2_adhd12,arsm2_adhd13,arsm2_adhd14,arsm2_adhd23,arsm2_adhd24,arsm2_adhd34,arsm2_adhd123,arsm2_adhd124,arsm2_adhd134,arsm2_adhd234,arsm2_adhd1234)
+groups_arms1 <- list(filtered_data_arms1,arms1_ctrl_subjects,arms1_only_adhd1,arms1_only_adhd2,arms1_only_adhd3,arms1_only_adhd4,arms1_adhd12,arms1_adhd13,arms1_adhd14,arms1_adhd23,arms1_adhd24,arms1_adhd34,arms1_adhd123,arms1_adhd124,arms1_adhd134,arms1_adhd234,arms1_adhd1234)
+groups_arms2 <- list(filtered_data_arms2,arms2_ctrl_subjects,arms2_only_adhd1,arms2_only_adhd2,arms2_only_adhd3,arms2_only_adhd4,arms2_adhd12,arms2_adhd13,arms2_adhd14,arms2_adhd23,arms2_adhd24,arms2_adhd34,arms2_adhd123,arms2_adhd124,arms2_adhd134,arms2_adhd234,arms2_adhd1234)
 
 for (df in groups_arms1){  
   if (nrow(df) > 0){
@@ -215,34 +215,23 @@ proportion_data_arms2 <- agg_data_arms2_tidy %>%
          proportion = count/group_total) %>%
   ungroup()
 
-############# testing viz ##################
-# Define the data array
-#data <- c(0.3829787, 0.2583587, 0.1367781, 0.063829787, 0.617021277)
 
-# Define the labels for the x-axis
-#labels <- c("ADHD1_total", "ADHD2_total", "ADHD3_total", "ADHD4_total", "Ctrl_total")
-
-# Create the bar chart
-#barplot(data, names.arg = labels, xlab = "label", ylab = "Proportion",
-#        main = "Fluid Community 6, Arm1", col = "steelblue")
-
-
-############## new necessary stacked bar chart #################
-
+#plot horizontal stacked bar chart for adhd label proportions 
 ggplot(proportion_data_arms1, aes(fill=ADHD_label, y=proportion, x=community)) +
   geom_bar(position="fill", stat="identity") +
+  labs(x = "Community", y = "Label Proportion", title = "ADHD Label proportion for Fluid Arms1") +
   coord_flip()
 
 ggplot(proportion_data_arms2, aes(fill=ADHD_label, y=proportion, x=community)) +
   geom_bar(position="fill", stat="identity") +
+  labs(x = "Community", y = "Label Proportion", title = "ADHD Label proportion for Fluid Arms2") +
   coord_flip()
 
 
+########### chi squared analysis ############
 
-library(dplyr)
-library(ggplot2)
 
-# Calculate the totals
+#calculate the totals for proportion data
 data_with_totals <- proportion_data_arms1 %>%
   group_by(community) %>%
   mutate(ADHD1_total = sum(proportion[ADHD_label == "ADHD1"]),
@@ -251,7 +240,8 @@ data_with_totals <- proportion_data_arms1 %>%
          ADHD4_total = proportion[ADHD_label == "ADHD4"]) %>%
   ungroup()
 
-# Create the bar chart
+
+#create the proportion bar chart bar chart !!!!!!!!!!!!! not using this one !!!!!!!!!!!!!!
 ggplot(data_with_totals, aes(x = ADHD_label, y = proportion, fill = ADHD_label)) +
   geom_col(position = "dodge") +
   facet_wrap(~community) +
@@ -267,7 +257,6 @@ ggplot(data_with_totals, aes(x = ADHD_label, y = proportion, fill = ADHD_label))
                                  "Ctrl" = "Control"))
 
 
-
 #test for chi squared calculation 
 chi_sq_test <- function(observed, expected) {
   chisq_result <- chisq.test(observed, p = expected)
@@ -275,6 +264,7 @@ chi_sq_test <- function(observed, expected) {
 }
 
 comparison_results <- list()
+
 
 #across arms
 for (comm1 in unique(proportion_data_arms1$community)) {
@@ -296,7 +286,7 @@ for (comm1 in unique(proportion_data_arms1$community)) {
 }
 
 
-#within arms
+#within arms !!!!!!!!!! dont run this if already running above "across arms" !!!!!!!!!!!!!
 for (comm1 in unique(proportion_data_arms2$community)) {
   #subset the data for the current community in arms1
   comm1_data <- proportion_data_arms2 %>%
@@ -315,16 +305,18 @@ for (comm1 in unique(proportion_data_arms2$community)) {
   }
 }
 
+
 #create a data frame to sort comparison results from most to least similar
 sorted_results_df <- data.frame(
   comparison = names(comparison_results),
   chi_squared = unname(sapply(comparison_results, function(x) x)),
   row.names = NULL
 )
+
 sorted_results_df <- sorted_results_df[order(sorted_results_df$chi_squared), ]
 
 
-#################Viz#################
+################# matrix viz for community chi squared metric #################
 
 
 #convert the list to a data frame
