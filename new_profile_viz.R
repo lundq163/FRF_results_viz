@@ -5,8 +5,8 @@ library(dplyr)
 
 
 #read the CSV file
-data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS1_merged.csv")
-data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS2_merged.csv")
+data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_list_ARMS1_merged.csv")
+data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_list_ARMS2_merged.csv")
 
 
 #filter the dataframe to include only the communities with more than 100 participants
@@ -21,6 +21,8 @@ filtered_data_arms2 <- data_arms2[data_arms2$community %in% communities_more_tha
 filtered_data_arms1$community <- factor(filtered_data_arms1$community)
 filtered_data_arms2$community <- factor(filtered_data_arms2$community)
 
+
+#calculate mean and se by community for arms1 then arms2
 mean_and_se_by_community_arms1 <- filtered_data_arms1 %>%
   group_by(community) %>%
   summarise(across(starts_with("nihtbx_"),
@@ -36,6 +38,7 @@ mean_and_se_by_community_arms2 <- filtered_data_arms2 %>%
                    .names = "{.col}_{.fn}"))
 
 
+#consolidate naming of metrics 
 mean_and_se_by_community_renamed_arms1 <- mean_and_se_by_community_arms1 %>%
   rename_with(~ {
     new_names <- str_split(., "_")
@@ -62,19 +65,22 @@ mean_and_se_by_community_renamed_arms2 <- mean_and_se_by_community_arms2 %>%
     unlist(new_names)
   }, starts_with("nihtbx"))
 
+
+#remove community and prediction metric from prefixes to plot
 unique_prefixes_arms1 <- mean_and_se_by_community_renamed_arms1 %>%
   names() %>%
   str_extract("^[^_]+") %>%
   unique() %>%
-  .[!. %in% c("community", "fluidcomp")]
+  .[!. %in% c("community", "list")]
 
 unique_prefixes_arms2 <- mean_and_se_by_community_renamed_arms2 %>%
   names() %>%
   str_extract("^[^_]+") %>%
   unique() %>%
-  .[!. %in% c("community", "fluidcomp")]
+  .[!. %in% c("community", "list")]
 
-# Convert the data from wide to long format
+
+#convert the data from wide to long format
 mean_and_se_by_community_long_arms1 <- pivot_longer(mean_and_se_by_community_renamed_arms1,
                                               cols = starts_with(unique_prefixes_arms1),
                                               names_to = c("metric", ".value"),
@@ -85,26 +91,27 @@ mean_and_se_by_community_long_arms2 <- pivot_longer(mean_and_se_by_community_ren
                                                     names_to = c("metric", ".value"),
                                                     names_sep = "_")
 
-# Plot the line chart with error bars
+
+#plot the line chart with error bars !!!!!! not necessary atm !!!!!!!!!!
 ggplot(mean_and_se_by_community_long_arms1, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms1") +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for list Arms1") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ggplot(mean_and_se_by_community_long_arms2, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms2") +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for list Arms2") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# Create a user input to select the desired communities
+
+#create a user input to select the desired communities from each arm
 communities_to_plot_arms1 <- select.list(communities_more_than_100_arms1, multiple = TRUE, title = "Select communities to plot:")
 communities_to_plot_arms2 <- select.list(communities_more_than_100_arms2, multiple = TRUE, title = "Select communities to plot:")
 
 
-# Select from both arms?????
-# Filter the reshaped data based on the selected communities
+#filter and combine the reshaped data based on the selected communities
 mean_and_se_by_community_selected_arms1 <- mean_and_se_by_community_long_arms1[mean_and_se_by_community_long_arms1$community %in% communities_to_plot_arms1, ]
 mean_and_se_by_community_selected_arms2 <- mean_and_se_by_community_long_arms2[mean_and_se_by_community_long_arms2$community %in% communities_to_plot_arms2, ]
 
@@ -113,15 +120,126 @@ combined_tibble <- bind_rows(
   mean_and_se_by_community_selected_arms2 %>% mutate(arm = 2)
 )
 
-# Plot the line chart with error bars
-ggplot(combined_tibble, aes(x = factor(metric), y = mean, color = community, group = community)) +
+
+#plot the line chart with error bars
+color_values <- setNames(
+  c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"),
+  unique(paste("ARMS", combined_tibble$arm, "comm", combined_tibble$community))
+)
+
+ggplot(combined_tibble, aes(x = factor(metric), y = mean, color = paste("ARMS",arm,"comm",community), group = paste("ARMS",arm,"comm",community))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = paste("ARMS",arm,"comm",community)), alpha = 0.2) +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community across ARMS for List (lower proportion adhd)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(name = "Community by Arm", values = color_values) +
+  scale_fill_manual(name = "Community by Arm", values = color_values)
+
+
+############## doing the same thing for upps/bisbas ##############
+
+
+#match columns that start with "bis_y" or "upps_y"
+cols_to_select_arms1 <- names(data_arms1)[str_detect(names(data_arms1), "^bis_y|^upps_y")]
+cols_to_select_arms2 <- names(data_arms2)[str_detect(names(data_arms2), "^bis_y|^upps_y")]
+
+
+#calculate mean and se by community for arms1 then arms2
+mean_and_se_by_community_arms1_bb <- filtered_data_arms1 %>%
+  group_by(community) %>%
+  summarise(across(all_of(cols_to_select_arms1),
+                   list(mean = ~ mean(.x, na.rm = TRUE),
+                        se = ~ sd(.x, na.rm = TRUE) / sqrt(n())),
+                   .names = "{.col}_{.fn}"))
+
+mean_and_se_by_community_arms2_bb <- filtered_data_arms2 %>%
+  group_by(community) %>%
+  summarise(across(all_of(cols_to_select_arms2),
+                   list(mean = ~ mean(.x, na.rm = TRUE),
+                        se = ~ sd(.x, na.rm = TRUE) / sqrt(n())),
+                   .names = "{.col}_{.fn}"))
+
+
+#consolidate naming of metrics
+mean_and_se_by_community_renamed_arms1_bb <- mean_and_se_by_community_arms1_bb %>%
+  rename_with(~ str_c(
+    str_extract(., "(?<=ss_).*?(?=\\.baseline_year_1_arm_1)"),
+    str_extract(., "(_mean|_se)?$"),
+    sep = ""
+  ), -community)
+
+mean_and_se_by_community_renamed_arms2_bb <- mean_and_se_by_community_arms2_bb %>%
+  rename_with(~ str_c(
+    str_extract(., "(?<=ss_).*?(?=\\.baseline_year_1_arm_1)"),
+    str_extract(., "(_mean|_se)?$"),
+    sep = ""
+  ), -community)
+
+
+#remove community and prediction metric from prefixes to plot
+unique_prefixes_arms1_bb <- names(mean_and_se_by_community_renamed_arms1_bb) %>%
+  str_remove("_mean|_se$") %>%  
+  unique() %>%  
+  .[!. %in% "community"] 
+
+unique_prefixes_arms2_bb <- names(mean_and_se_by_community_renamed_arms2_bb) %>%
+  str_remove("_mean|_se$") %>%  
+  unique() %>%  
+  .[!. %in% "community"] 
+
+
+#convert the data from wide to long format
+mean_and_se_by_community_long_arms1_bb <- pivot_longer(mean_and_se_by_community_renamed_arms1_bb,
+                                                       cols = starts_with(unique_prefixes_arms1_bb),
+                                                       names_to = c("metric", ".value"),
+                                                       names_sep = "_(?=[^_]+$)")
+
+mean_and_se_by_community_long_arms2_bb <- pivot_longer(mean_and_se_by_community_renamed_arms2_bb,
+                                                       cols = starts_with(unique_prefixes_arms2_bb),
+                                                       names_to = c("metric", ".value"),
+                                                       names_sep = "_(?=[^_]+$)")
+
+
+#plot the line chart with error bars !!!!!! not necessary atm !!!!!!!!!!
+ggplot(mean_and_se_by_community_long_arms1_bb, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms2") +
+  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community for List Arms1") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(combined_tibble, aes(x = factor(metric), y = mean, color = paste(community, "Arm", arm), group = paste(community, "Arm", arm))) +
+ggplot(mean_and_se_by_community_long_arms2_bb, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
-  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = paste(community, "Arm", arm)), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community for fluid Arms") +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
+  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community for List Arms2") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+#create a user input to select the desired communities from each arm
+communities_to_plot_arms1_bb <- select.list(communities_more_than_100_arms1, multiple = TRUE, title = "Select communities to plot:")
+communities_to_plot_arms2_bb <- select.list(communities_more_than_100_arms2, multiple = TRUE, title = "Select communities to plot:")
+
+
+#filter and combine the reshaped data based on the selected communities
+mean_and_se_by_community_selected_arms1_bb <- mean_and_se_by_community_long_arms1_bb[mean_and_se_by_community_long_arms1_bb$community %in% communities_to_plot_arms1_bb, ]
+mean_and_se_by_community_selected_arms2_bb <- mean_and_se_by_community_long_arms2_bb[mean_and_se_by_community_long_arms2_bb$community %in% communities_to_plot_arms2_bb, ]
+
+combined_tibble_bb <- bind_rows(
+  mean_and_se_by_community_selected_arms1_bb %>% mutate(arm = 1),
+  mean_and_se_by_community_selected_arms2_bb %>% mutate(arm = 2)
+)
+
+
+#plot the line chart with error bars
+color_values_bb <- setNames(
+  c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"),
+  unique(paste("ARMS", combined_tibble_bb$arm, "comm", combined_tibble_bb$community))
+)
+
+ggplot(combined_tibble_bb, aes(x = factor(metric), y = mean, color = paste("ARMS",arm,"comm",community), group = paste("ARMS",arm,"comm",community))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = paste("ARMS",arm,"comm",community)), alpha = 0.2) +
+  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community across ARMS for List (lower proportion adhd)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(name = "Community by Arm", values = color_values_bb) +
+  scale_fill_manual(name = "Community by Arm", values = color_values_bb)
+

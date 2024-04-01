@@ -3,8 +3,8 @@ library(dplyr)
 library(tidyr)
 
 #load merged adhd data
-data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_fluid_ARMS1_merged.csv")
-data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_fluid_ARMS2_merged.csv")
+data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_list_ARMS1_merged.csv")
+data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_list_ARMS2_merged.csv")
 
 
 #only keep communities with >100 participants 
@@ -216,13 +216,21 @@ proportion_data_arms2 <- agg_data_arms2_tidy %>%
   ungroup()
 
 
+#rename Ctrl values to be no_ADHD
+proportion_data_arms1_new <- proportion_data_arms1 %>%
+  mutate(ADHD_label = replace(ADHD_label, ADHD_label == "Ctrl", "no_ADHD"))
+
+proportion_data_arms2_new <- proportion_data_arms2 %>%
+  mutate(ADHD_label = replace(ADHD_label, ADHD_label == "Ctrl", "no_ADHD"))
+
+
 #plot horizontal stacked bar chart for adhd label proportions 
-ggplot(proportion_data_arms1, aes(fill=ADHD_label, y=proportion, x=community)) +
+ggplot(proportion_data_arms1_new, aes(fill=ADHD_label, y=proportion, x=community)) +
   geom_bar(position="fill", stat="identity") +
   labs(x = "Community", y = "Label Proportion", title = "ADHD Label proportion for Fluid Arms1") +
   coord_flip()
 
-ggplot(proportion_data_arms2, aes(fill=ADHD_label, y=proportion, x=community)) +
+ggplot(proportion_data_arms2_new, aes(fill=ADHD_label, y=proportion, x=community)) +
   geom_bar(position="fill", stat="identity") +
   labs(x = "Community", y = "Label Proportion", title = "ADHD Label proportion for Fluid Arms2") +
   coord_flip()
