@@ -38,8 +38,36 @@ mean_and_se_by_community_arms2 <- filtered_data_arms2 %>%
                    .names = "{.col}_{.fn}"))
 
 
+#calculate mean and se for all ABCD participants (nihtbx and upps/bisbas)
+arms1_test_full_data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/data/ARMS1_test_FRF_UPPS_short_for_FRF_fixed.csv")
+arms1_train_full_data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/data/ARMS1_train_FRF_UPPS_short_for_FRF_fixed.csv")
+arms2_test_full_data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/data/ARMS2_test_FRF_UPPS_short_for_FRF_fixed.csv")
+arms2_train_full_data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/data/ARMS2_train_FRF_UPPS_short_for_FRF_fixed.csv")
+
+combined_full_data <- rbind(arms1_test_full_data, arms1_train_full_data, arms2_test_full_data, arms2_train_full_data)
+
+#combined_full_data2 <- combined_full_data[!duplicated(combined_full_data$src_subject_id.baseline_year_1_arm_1.x), ]
+#above not needed. all subject ids are unique
+
+combined_full_data_rel_cols <- combined_full_data %>%
+  select(matches('^(src|bis|upps|nihtbx).*'))
+
+mean_and_se_all_data_nih <- combined_full_data_rel_cols %>%
+  summarise(across(starts_with("nihtbx_"),
+                   list(mean = ~ mean(.x, na.rm = TRUE),
+                        se = ~ sd(.x, na.rm = TRUE) / sqrt(n())),
+                   .names = "{.col}_{.fn}"))
+
+mean_and_se_all_data_nih$community <- "all"
+
+mean_and_se_by_community_arms1_combined <- rbind(mean_and_se_all_data_nih, mean_and_se_by_community_arms1)
+mean_and_se_by_community_arms2_combined <- rbind(mean_and_se_all_data_nih, mean_and_se_by_community_arms2)
+
+
+
+
 #consolidate naming of metrics 
-mean_and_se_by_community_renamed_arms1 <- mean_and_se_by_community_arms1 %>%
+mean_and_se_by_community_renamed_arms1 <- mean_and_se_by_community_arms1_combined %>%
   rename_with(~ {
     new_names <- str_split(., "_")
     new_names <- lapply(new_names, function(parts) {
@@ -52,7 +80,7 @@ mean_and_se_by_community_renamed_arms1 <- mean_and_se_by_community_arms1 %>%
     unlist(new_names)
   }, starts_with("nihtbx"))
 
-mean_and_se_by_community_renamed_arms2 <- mean_and_se_by_community_arms2 %>%
+mean_and_se_by_community_renamed_arms2 <- mean_and_se_by_community_arms2_combined %>%
   rename_with(~ {
     new_names <- str_split(., "_")
     new_names <- lapply(new_names, function(parts) {
@@ -107,6 +135,9 @@ ggplot(mean_and_se_by_community_long_arms2, aes(x = factor(metric), y = mean, co
 
 
 #create a user input to select the desired communities from each arm
+communities_more_than_100_arms1 <- c(communities_more_than_100_arms1, "all")
+communities_more_than_100_arms2 <- c(communities_more_than_100_arms2, "all")
+
 communities_to_plot_arms1 <- select.list(communities_more_than_100_arms1, multiple = TRUE, title = "Select communities to plot:")
 communities_to_plot_arms2 <- select.list(communities_more_than_100_arms2, multiple = TRUE, title = "Select communities to plot:")
 
