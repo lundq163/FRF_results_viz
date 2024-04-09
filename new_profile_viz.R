@@ -5,8 +5,8 @@ library(dplyr)
 
 
 #read the CSV file
-data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_list_ARMS1_merged.csv")
-data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_list_ARMS2_merged.csv")
+data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS1_merged.csv")
+data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS2_merged.csv")
 
 
 #filter the dataframe to include only the communities with more than 100 participants
@@ -64,8 +64,6 @@ mean_and_se_by_community_arms1_combined <- rbind(mean_and_se_all_data_nih, mean_
 mean_and_se_by_community_arms2_combined <- rbind(mean_and_se_all_data_nih, mean_and_se_by_community_arms2)
 
 
-
-
 #consolidate naming of metrics 
 mean_and_se_by_community_renamed_arms1 <- mean_and_se_by_community_arms1_combined %>%
   rename_with(~ {
@@ -99,13 +97,13 @@ unique_prefixes_arms1 <- mean_and_se_by_community_renamed_arms1 %>%
   names() %>%
   str_extract("^[^_]+") %>%
   unique() %>%
-  .[!. %in% c("community", "list")]
+  .[!. %in% c("community", "fluidcomp")]
 
 unique_prefixes_arms2 <- mean_and_se_by_community_renamed_arms2 %>%
   names() %>%
   str_extract("^[^_]+") %>%
   unique() %>%
-  .[!. %in% c("community", "list")]
+  .[!. %in% c("community", "fluidcomp")]
 
 
 #convert the data from wide to long format
@@ -136,8 +134,10 @@ ggplot(mean_and_se_by_community_long_arms2, aes(x = factor(metric), y = mean, co
 
 #create a user input to select the desired communities from each arm
 communities_more_than_100_arms1 <- c(communities_more_than_100_arms1, "all")
-communities_more_than_100_arms2 <- c(communities_more_than_100_arms2, "all")
+#communities_more_than_100_arms2 <- c(communities_more_than_100_arms2, "all")
 
+
+#restart here if creating new plot
 communities_to_plot_arms1 <- select.list(communities_more_than_100_arms1, multiple = TRUE, title = "Select communities to plot:")
 communities_to_plot_arms2 <- select.list(communities_more_than_100_arms2, multiple = TRUE, title = "Select communities to plot:")
 
@@ -161,10 +161,53 @@ color_values <- setNames(
 ggplot(combined_tibble, aes(x = factor(metric), y = mean, color = paste("ARMS",arm,"comm",community), group = paste("ARMS",arm,"comm",community))) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = paste("ARMS",arm,"comm",community)), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community across ARMS for List (lower proportion adhd)") +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community across ARMS for List (higher proportion adhd)") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_color_manual(name = "Community by Arm", values = color_values) +
   scale_fill_manual(name = "Community by Arm", values = color_values)
+
+
+############ most up to date plot!!! for utilizing and properly coloring 'all' data #####################
+
+
+#create a vector of colors with 'all' community as black
+color_values <- c(
+  'all' = 'black',
+  setNames(
+    c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"),
+    unique(paste("ARMS", combined_tibble$arm[combined_tibble$community != 'all'], "comm", combined_tibble$community[combined_tibble$community != 'all']))
+  )
+)
+
+#plot the og figure
+original_plot <- ggplot(combined_tibble, aes(x = factor(metric), y = mean, color = paste("ARMS", arm, "comm", community), group = paste("ARMS", arm, "comm", community))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = paste("ARMS", arm, "comm", community)), alpha = 0.2) +
+  labs(x = "Metric", y = "Average", title = "NIH toolbox Metrics by Community across ARMS for List") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(name = "Community by Arm", values = color_values) +
+  scale_fill_manual(name = "Community by Arm", values = color_values)
+
+#add the 'all' community as a separate layer
+all_community <- combined_tibble[combined_tibble$community == 'all', ]
+final_plot <- original_plot +
+  geom_line(data = all_community, aes(x = factor(metric), y = mean, color = "all", group = paste("ARMS", arm)), linewidth = 1.2) +
+  geom_ribbon(data = all_community, aes(x = factor(metric), ymin = mean - se, ymax = mean + se, fill = "all"), alpha = 0.2)
+
+#create a new color mapping for the 'all' community
+all_color_mapping <- c("all" = "black")
+
+final_plot +
+  scale_color_manual(
+    name = "Community by Arm",
+    values = c(all_color_mapping, color_values[names(color_values) != 'all']),
+    labels = c("all" = "all", names(color_values)[-1])
+  ) +
+  scale_fill_manual(
+    name = "Community by Arm",
+    values = c(all_color_mapping, color_values[names(color_values) != 'all']),
+    labels = c("all" = "all", names(color_values)[-1])
+  )
 
 
 ############## doing the same thing for upps/bisbas ##############
@@ -191,15 +234,28 @@ mean_and_se_by_community_arms2_bb <- filtered_data_arms2 %>%
                    .names = "{.col}_{.fn}"))
 
 
+#calculate mean and se for all ABCD data
+mean_and_se_all_data_bb <- combined_full_data_rel_cols %>%
+  summarise(across(all_of(cols_to_select_arms1),
+                   list(mean = ~ mean(.x, na.rm = TRUE),
+                        se = ~ sd(.x, na.rm = TRUE) / sqrt(n())),
+                   .names = "{.col}_{.fn}"))
+
+mean_and_se_all_data_bb$community <- "all"
+
+mean_and_se_by_community_arms1_combined_bb <- rbind(mean_and_se_all_data_bb, mean_and_se_by_community_arms1_bb)
+mean_and_se_by_community_arms2_combined_bb <- rbind(mean_and_se_all_data_bb, mean_and_se_by_community_arms2_bb)
+
+
 #consolidate naming of metrics
-mean_and_se_by_community_renamed_arms1_bb <- mean_and_se_by_community_arms1_bb %>%
+mean_and_se_by_community_renamed_arms1_bb <- mean_and_se_by_community_arms1_combined_bb %>%
   rename_with(~ str_c(
     str_extract(., "(?<=ss_).*?(?=\\.baseline_year_1_arm_1)"),
     str_extract(., "(_mean|_se)?$"),
     sep = ""
   ), -community)
 
-mean_and_se_by_community_renamed_arms2_bb <- mean_and_se_by_community_arms2_bb %>%
+mean_and_se_by_community_renamed_arms2_bb <- mean_and_se_by_community_arms2_combined_bb %>%
   rename_with(~ str_c(
     str_extract(., "(?<=ss_).*?(?=\\.baseline_year_1_arm_1)"),
     str_extract(., "(_mean|_se)?$"),
@@ -235,16 +291,17 @@ mean_and_se_by_community_long_arms2_bb <- pivot_longer(mean_and_se_by_community_
 ggplot(mean_and_se_by_community_long_arms1_bb, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community for List Arms1") +
+  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community for fluid Arms1") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ggplot(mean_and_se_by_community_long_arms2_bb, aes(x = factor(metric), y = mean, color = community, group = community)) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = community), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community for List Arms2") +
+  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community for fluid Arms2") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
+#restart here if creating a new plot
 #create a user input to select the desired communities from each arm
 communities_to_plot_arms1_bb <- select.list(communities_more_than_100_arms1, multiple = TRUE, title = "Select communities to plot:")
 communities_to_plot_arms2_bb <- select.list(communities_more_than_100_arms2, multiple = TRUE, title = "Select communities to plot:")
@@ -269,8 +326,52 @@ color_values_bb <- setNames(
 ggplot(combined_tibble_bb, aes(x = factor(metric), y = mean, color = paste("ARMS",arm,"comm",community), group = paste("ARMS",arm,"comm",community))) +
   geom_line() +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = paste("ARMS",arm,"comm",community)), alpha = 0.2) +
-  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community across ARMS for List (lower proportion adhd)") +
+  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community across ARMS for Fluid (higher proportion adhd)") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_color_manual(name = "Community by Arm", values = color_values_bb) +
   scale_fill_manual(name = "Community by Arm", values = color_values_bb)
+
+
+############ most up to date plot!!! for utilizing and properly coloring 'all' data #####################
+
+
+#create a vector of colors with 'all' community as black
+color_values <- c(
+  'all' = 'black',
+  setNames(
+    c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"),
+    unique(paste("ARMS", combined_tibble_bb$arm[combined_tibble_bb$community != 'all'], "comm", combined_tibble_bb$community[combined_tibble_bb$community != 'all']))
+  )
+)
+
+#plot the og figure
+original_plot <- ggplot(combined_tibble_bb, aes(x = factor(metric), y = mean, color = paste("ARMS", arm, "comm", community), group = paste("ARMS", arm, "comm", community))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = paste("ARMS", arm, "comm", community)), alpha = 0.2) +
+  labs(x = "Metric", y = "Average", title = "UPPS/BISBAS Metrics by Community across ARMS for Fluid") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(name = "Community by Arm", values = color_values) +
+  scale_fill_manual(name = "Community by Arm", values = color_values)
+
+#add the 'all' community as a separate layer
+all_community <- combined_tibble_bb[combined_tibble_bb$community == 'all', ]
+final_plot <- original_plot +
+  geom_line(data = all_community, aes(x = factor(metric), y = mean, color = "all", group = paste("ARMS", arm)), linewidth = 1.2) +
+  geom_ribbon(data = all_community, aes(x = factor(metric), ymin = mean - se, ymax = mean + se, fill = "all"), alpha = 0.2)
+
+#create a new color mapping for the 'all' community
+all_color_mapping <- c("all" = "black")
+
+final_plot +
+  scale_color_manual(
+    name = "Community by Arm",
+    values = c(all_color_mapping, color_values[names(color_values) != 'all']),
+    labels = c("all" = "all", names(color_values)[-1])
+  ) +
+  scale_fill_manual(
+    name = "Community by Arm",
+    values = c(all_color_mapping, color_values[names(color_values) != 'all']),
+    labels = c("all" = "all", names(color_values)[-1])
+  )
+
 
