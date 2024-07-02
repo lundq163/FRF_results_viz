@@ -6,8 +6,8 @@ library(dplyr)
 
 #read the CSV file
 data_arms1 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS1_merged.csv")
-data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS2_merged.csv")
-
+#data_arms2 <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/Temp_fixed_fluid_ARMS2_merged.csv")
+data_arms2 <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/GBM_work/arms2_cog_data_with_arms1_xgb_model.csv")
 
 #filter the dataframe to include only the communities with more than 100 participants
 communities_more_than_100_arms1 <- names(table(data_arms1$community))[table(data_arms1$community) > 100]
