@@ -9,8 +9,10 @@ arms1_list_subgroup_data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/f
 arms2_fluid_subgroup_data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ARMS2_comb_fluid_comm.csv")
 arms2_flanker_subgroup_data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ARMS2_comb_flanker_comm.csv")
 arms2_list_subgroup_data <- read.csv("/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ARMS2_comb_list_comm.csv")
-arsm2_comm_arms1_xgb_pred_data <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/GBM_work/id_predictions_ARMS2.csv")
-arms1_comm_arms2_xgb_pred_data <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/GBM_work/id_predictions_list_ARMS1.csv")
+list_arsm2_comm_arms1_xgb_pred_data <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/GBM_work/id_predictions_list_ARMS2.csv")
+list_arms1_comm_arms2_xgb_pred_data <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/GBM_work/id_predictions_list_ARMS1.csv")
+fluid_arsm2_comm_arms1_xgb_pred_data <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/GBM_work/id_predictions_fluid_ARMS2.csv")
+fluid_arms1_comm_arms2_xgb_pred_data <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/GBM_work/id_predictions_fluid_ARMS1.csv")
 
 # Merge the two data frames based on a common subject identifier
 merged_arms1_fluid_data <- merge(adhd_data, arms1_fluid_subgroup_data, by.x = "subjectkey", by.y = "subject_id")
@@ -19,8 +21,10 @@ merged_arms1_list_data <- merge(adhd_data, arms1_list_subgroup_data, by.x = "sub
 merged_arms2_fluid_data <- merge(adhd_data, arms2_fluid_subgroup_data, by.x = "subjectkey", by.y = "subject_id")
 merged_arms2_flanker_data <- merge(adhd_data, arms2_flanker_subgroup_data, by.x = "subjectkey", by.y = "subject_id")
 merged_arms2_list_data <- merge(adhd_data, arms2_list_subgroup_data, by.x = "subjectkey", by.y = "subject_id")
-merged_arms2_arms1xgb_data <- merge(adhd_data, arsm2_comm_arms1_xgb_pred_data, by.x = "subjectkey", by.y = "subject_id")
-merged_arms1_arms2xgb_data <- merge(adhd_data, arms1_comm_arms2_xgb_pred_data, by.x = "subjectkey", by.y = "subject_id")
+list_merged_arms2_arms1xgb_data <- merge(adhd_data, list_arsm2_comm_arms1_xgb_pred_data, by.x = "subjectkey", by.y = "subject_id")
+list_merged_arms1_arms2xgb_data <- merge(adhd_data, list_arms1_comm_arms2_xgb_pred_data, by.x = "subjectkey", by.y = "subject_id")
+fluid_merged_arms2_arms1xgb_data <- merge(adhd_data, fluid_arsm2_comm_arms1_xgb_pred_data, by.x = "subjectkey", by.y = "subject_id")
+fluid_merged_arms1_arms2xgb_data <- merge(adhd_data, fluid_arms1_comm_arms2_xgb_pred_data, by.x = "subjectkey", by.y = "subject_id")
 
 
 # Save the merged data to a new CSV file
@@ -30,8 +34,10 @@ write.csv(merged_arms1_list_data, "/home/feczk001/shared/projects/FEZ_USERS/fecz
 write.csv(merged_arms2_fluid_data, "/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_fluid_ARMS2_merged.csv", row.names = FALSE)
 write.csv(merged_arms2_flanker_data, "/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_flanker_ARMS2_merged.csv", row.names = FALSE)
 write.csv(merged_arms2_list_data, "/home/feczk001/shared/projects/FEZ_USERS/feczk001/UPPS_ABCD_FRF/code/jacob/ADHDscores_list_ARMS2_merged.csv", row.names = FALSE)
-write.csv(merged_arms2_arms1xgb_data, "/home/faird/lundq163/projects/FRF_results_viz/GBM_work/ADHDscores_ARMS2_arms1xgb_merged.csv", row.names = FALSE)
-write.csv(merged_arms1_arms2xgb_data, "/home/faird/lundq163/projects/FRF_results_viz/GBM_work/ADHDscores_ARMS1_arms2xgb_merged.csv", row.names = FALSE)
+write.csv(list_merged_arms2_arms1xgb_data, "/home/faird/lundq163/projects/FRF_results_viz/GBM_work/list_ADHDscores_ARMS2_arms1xgb_merged.csv", row.names = FALSE)
+write.csv(list_merged_arms1_arms2xgb_data, "/home/faird/lundq163/projects/FRF_results_viz/GBM_work/list_ADHDscores_ARMS1_arms2xgb_merged.csv", row.names = FALSE)
+write.csv(fluid_merged_arms2_arms1xgb_data, "/home/faird/lundq163/projects/FRF_results_viz/GBM_work/fluid_ADHDscores_ARMS2_arms1xgb_merged.csv", row.names = FALSE)
+write.csv(fluid_merged_arms1_arms2xgb_data, "/home/faird/lundq163/projects/FRF_results_viz/GBM_work/fluid_ADHDscores_ARMS1_arms2xgb_merged.csv", row.names = FALSE)
 
 
 
