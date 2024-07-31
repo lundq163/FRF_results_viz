@@ -4,3 +4,4 @@ dtf_ABCD_long_form = abcddata_initialize_long_form()
 sui_data = abcddata_add.substance_use(dtf_ABCD_long_form)
 sui_data$SBS.CHR.CS.ALC.Type_of_use
 attr(sui_data$SBS.CHR.CS.ALC.Type_of_use, "abcd_codebook")
+write.csv(sui_data,"~/projects/FRF_results_viz/substance_use_work/substance_use_rdata.csv")
