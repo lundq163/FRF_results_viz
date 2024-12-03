@@ -1,0 +1,327 @@
+---
+title: "demographics_arm1_chisq"
+format: html
+editor: visual
+---
+
+## Datafile
+```{r}
+library(tidyverse)
+```
+
+
+
+```{r}
+df <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/demographics_work/arms1_frf_adhd_count_comm_race.csv")
+```
+
+## chisq analysis
+
+```{r}
+df$community <- as.factor(df$community)
+df$race_grouped <- as.factor(df$race_grouped)
+```
+
+```{r}
+data <- data.frame(
+  Community = df$community,
+  Cases = df$ADHD_true,
+  Controls = df$ADHD_false
+)
+```
+
+```{r}
+# Create a contingency table
+contingency_table <- as.table(as.matrix(data[, -1]))
+rownames(contingency_table) <- data$Community
+
+```
+
+```{r}
+# Perform the chi-squared test
+chi_sq_test <- chisq.test(contingency_table)
+chi_sq_test
+
+```
+
+```{r}
+library(ggplot2)
+
+# Reshape data for ggplot
+data_long <- tidyr::pivot_longer(data, cols = c(Cases, Controls), names_to = "Type", values_to = "Count")
+
+# Plot
+ggplot(data_long, aes(x = Community, y = Count, fill = Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Cases vs Controls Across Sites", x = "Community", y = "Count") +
+  theme_minimal()
+
+```
+
+## Test Site 4
+
+```{r}
+totals <- df %>% group_by(race_grouped) %>% mutate(Cases = sum(ADHD_true), Controls = sum(ADHD_false)) %>% dplyr::select(race_grouped, Cases, Controls) %>% unique()
+```
+
+```{r}
+Comm_4 <- df %>% filter(community == 4) %>% mutate(Cases = ADHD_true, Controls = ADHD_false) %>% dplyr::select(race_grouped, Cases, Controls) 
+```
+
+```{r}
+totals$community <- "A"
+Comm_4$community <- "B"
+data <- rbind(totals, Comm_4)
+```
+
+```{r}
+# Create a contingency table
+contingency_table <- as.table(as.matrix(data[, c(2,3)]))
+rownames(contingency_table) <- data$community
+print(contingency_table)
+```
+
+```{r}
+# Perform the chi-squared test
+chi_sq_test <- chisq.test(contingency_table)
+chi_sq_test
+
+```
+
+## Question: Is there a difference in cases and controls between different race brackets?
+
+```{r}
+data <- data.frame(race = df$race_grouped, Cases = df$ADHD_true, Controls = df$ADHD_false)
+```
+
+```{r}
+# Create a contingency table
+contingency_table <- as.table(as.matrix(data[, -1]))
+rownames(contingency_table) <- data$Community
+```
+
+```{r}
+# Perform the chi-squared test
+chi_sq_test <- chisq.test(contingency_table)
+chi_sq_test
+```
+
+```{r}
+expected_table <- chi_sq_test$expected
+cbind(contingency_table, expected_table)
+```
+
+```{r}
+contrast_table <- contingency_table - expected_table
+rownames(contrast_table) <- df$community
+colnames(contrast_table) <- c("Cases_OE", "Controls_OE") 
+
+newdf <- df %>% mutate(Cases_OE=contrast_table[,1], Controls_OE=contrast_table[,2]) %>% mutate(Cases_Exp=expected_table[,1], Controls_Exp=expected_table[,2])
+
+```
+
+```{r}
+library(ggplot2)
+library(reshape2)
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Example data (replace with your actual data)
+data <- newdf
+
+# Create a ggplot table-like visualization with a color-coded column
+ggplot(data, aes(x = community, y = race_grouped)) +
+  geom_tile(aes(fill = Cases_OE), color = "white") + # Color-code based on "Difference" column
+  geom_text(aes(label = paste0(round(Cases_OE, 2))), size = 4) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(
+    title = "Observed vs Expected Counts (Color-coded by Difference)",
+    fill = "Difference"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+```{r}
+# Example data (replace with your actual data)
+data <- newdf
+data$prop <- data$ADHD_true/(data$ADHD_true + data$ADHD_false)
+data$exp <- data$Cases_Exp/(data$Cases_Exp + data$Controls_Exp)
+data$prop_OE <- data$prop - data$exp
+
+# Create a ggplot table-like visualization with a color-coded column
+ggplot(data, aes(x = community, y = race_grouped)) +
+  geom_tile(aes(fill = prop_OE), color = "white") + # Color-code based on "Difference" column
+  geom_text(aes(label = paste0(round(prop_OE, 2))), size = 4) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(
+    title = "Observed vs Expected Counts (Color-coded by Difference)",
+    fill = "Difference"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+ggplot(data, aes(x = community, y = race_grouped)) +
+  geom_tile(aes(fill = Cases_OE), color = "white") + # Color-code based on "Difference" column
+  geom_text(aes(label = paste0(round(Cases_OE, 2))), size = 4) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(
+    title = "Observed vs Expected Counts (Color-coded by Difference)",
+    fill = "Difference"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(reshape2)
+
+# Example data (replace with your actual data)
+data <- data.frame(
+  Race = newdf,
+  City = c("City_A", "City_B", "City_A", "City_B", "City_A", "City_B", "City_A", "City_B"),
+  Counts = c(200, 150, 100, 120, 50, 70, 80, 60)
+)
+
+# Create contingency table
+contingency_table <- xtabs(Counts ~ Race + City, data = data)
+
+# Perform Chi-square test
+chi_square_test <- chisq.test(contingency_table)
+
+# Extract observed and expected counts
+observed <- as.data.frame(as.table(contingency_table))
+expected <- as.data.frame(as.table(chi_square_test$expected))
+
+# Combine observed and expected counts
+observed$Expected <- expected$Freq
+
+# Create a ggplot table-like visualization
+ggplot(observed, aes(x = City, y = Race)) +
+  geom_tile(aes(fill = Observed - Expected), color = "white") +
+  geom_text(aes(label = paste0("Obs: ", round(Freq, 1), "\nExp: ", round(Expected, 1))), size = 4) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(
+    title = "Observed vs Expected Counts for Race and City (Chi-Square Test)",
+    fill = "Obs - Exp"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(reshape2)
+
+# Example data (replace with your actual data)
+data <- data.frame(
+  Status = c("Case", "Case", "Case", "Case", "Control", "Control", "Control", "Control"),
+  Race = c("White", "Black", "Asian", "Hispanic", "White", "Black", "Asian", "Hispanic"),
+  City = c("City_A", "City_A", "City_A", "City_A", "City_B", "City_B", "City_B", "City_B"),
+  Counts = c(100, 80, 60, 40, 120, 100, 50, 70)
+)
+
+# Create contingency table
+contingency_table <- xtabs(Counts ~ Status + Race + City, data = data)
+
+# Perform Chi-square test for each city
+chisq_results <- lapply(split(contingency_table, dim(contingency_table)[3]), function(mat) {
+  chisq.test(mat)
+})
+
+# Extract observed and expected counts
+observed_list <- lapply(chisq_results, function(res) as.data.frame(as.table(res$observed)))
+expected_list <- lapply(chisq_results, function(res) as.data.frame(as.table(res$expected)))
+
+# Combine observed and expected counts into a single data frame
+results <- do.call(rbind, Map(function(obs, exp, city) {
+  obs$Expected <- exp$Freq
+  obs$City <- city
+  obs
+}, observed_list, expected_list, names(observed_list)))
+
+# Rename columns
+colnames(results) <- c("Status", "Race", "Observed", "Expected", "City")
+
+# Create a ggplot table-like visualization
+ggplot(results, aes(x = Race, y = Status)) +
+  geom_tile(aes(fill = Observed - Expected), color = "white") +
+  geom_text(aes(label = paste0("Obs: ", round(Observed, 1), "\nExp: ", round(Expected, 1))), size = 4) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  facet_wrap(~City) +
+  labs(
+    title = "Observed vs Expected Counts for Case-Control by Race and City (Chi-Square Test)",
+    fill = "Obs - Exp"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+## anova
+
+```{r}
+data$community <- as.factor(data$community)
+data$community <- relevel(data$community, ref=4)
+m0 <- glm(prop ~ community, data=data, family=binomial)
+
+summary(m0)
+
+data$race <- as.factor(data$race_grouped)
+data$race <- relevel(data$race, ref="White")
+
+m1 <- glm(prop ~ community + race, data=data, family=binomial)
+
+anova(m0,m1)
+
+```
+
+```{r}
+data$community <- as.factor(data$community)
+data$community <- relevel(data$community, ref=4)
+
+
+data$race <- as.factor(data$race_grouped)
+data$race <- relevel(data$race, ref="White")
+
+m0 <- glm(prop ~ race, data=data, family=binomial)
+
+m1 <- glm(prop ~ community + race, data=data, family=binomial)
+
+anova(m0,m1)
+
+```
+

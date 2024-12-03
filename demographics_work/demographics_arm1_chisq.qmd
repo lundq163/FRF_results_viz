@@ -1,0 +1,122 @@
+---
+title: "demographics_arm1_chisq"
+format: html
+editor: visual
+---
+
+## Datafile
+
+```{r}
+df <- read.csv("/home/faird/lundq163/projects/FRF_results_viz/demographics_work/arms1_frf_adhd_count_comm_income.csv")
+```
+
+## chisq analysis
+
+```{r}
+df$community <- as.factor(df$community)
+df$income_grouped <- as.factor(df$income_grouped)
+```
+
+```{r}
+data <- data.frame(
+  Site = df$community,
+  Cases = df$ADHD_true,
+  Controls = df$ADHD_false
+)
+```
+
+```{r}
+# Create a contingency table
+contingency_table <- as.table(as.matrix(data[, -1]))
+rownames(contingency_table) <- data$Site
+
+```
+
+```{r}
+# Perform the chi-squared test
+chi_sq_test <- chisq.test(contingency_table)
+chi_sq_test
+
+```
+
+```{r}
+library(ggplot2)
+
+# Reshape data for ggplot
+data_long <- tidyr::pivot_longer(data, cols = c(Cases, Controls), names_to = "Type", values_to = "Count")
+
+# Plot
+ggplot(data_long, aes(x = Site, y = Count, fill = Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Cases vs Controls Across Sites", x = "Site", y = "Count") +
+  theme_minimal()
+
+```
+
+## Test Site 4
+
+```{r}
+totals <- df %>% group_by(income_grouped) %>% mutate(Cases = sum(ADHD_true), Controls = sum(ADHD_false)) %>% dplyr::select(income_grouped, Cases, Controls) %>% unique()
+```
+
+```{r}
+Site_4 <- df %>% filter(community == 4) %>% mutate(Cases = ADHD_true, Controls = ADHD_false) %>% dplyr::select(income_grouped, Cases, Controls) 
+```
+
+```{r}
+totals$site <- "A"
+Site_4$site <- "B"
+data <- rbind(totals, Site_4)
+```
+
+```{r}
+# Create a contingency table
+contingency_table <- as.table(as.matrix(data[, c(2,3)]))
+rownames(contingency_table) <- data$site
+print(contingency_table)
+```
+
+```{r}
+# Perform the chi-squared test
+chi_sq_test <- chisq.test(contingency_table)
+chi_sq_test
+
+```
+
+## Question: Is there a difference in cases and controls between different income brackets?
+
+```{r}
+data <- data.frame(income = df$income_grouped, Cases = df$ADHD_true, Controls = df$ADHD_false)
+```
+
+```{r}
+# Create a contingency table
+contingency_table <- as.table(as.matrix(data[, -1]))
+rownames(contingency_table) <- data$Site
+```
+
+```{r}
+# Perform the chi-squared test
+chi_sq_test <- chisq.test(contingency_table)
+chi_sq_test
+```
+
+```{r}
+expected_table <- chi_sq_test$expected
+cbind(contingency_table, expected_table)
+```
+
+```{r}
+contrast_table <- contingency_table - expected_table
+rownames(contrast_table) <- df$community
+colnames(contrast_table) <- c("Cases_OE", "Controls_OE") 
+
+newdf <- df %>% mutate(OE=contrast_table[,1])
+
+```
+
+## Model
+
+```{r}
+
+```
